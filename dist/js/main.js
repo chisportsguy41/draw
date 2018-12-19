@@ -36,6 +36,11 @@ var draw = (function() {
   //Tracks whether the user is drawing
   var isDrawing = false;
 
+  //Sets color based on user input
+  var colorWell;
+  var defaultColor = "#0000ff";
+  var currentColor;
+
   return {
     //Set the x,y coords based on current event data
     setXY: function(evt) {
@@ -82,6 +87,8 @@ var draw = (function() {
         this.drawLine();
       } else if(shape==='circle') {
         this.drawCircle();
+      } else if(shape==='triangle') {
+        this.drawTriangle();
       } else if(shape==='path') {
         this.drawPath();
       } else {
@@ -92,8 +99,7 @@ var draw = (function() {
 
     //Draw a line
     drawLine: function() {
-      //Start by using random fill colors.
-      ctx.strokeStyle = '#'+Math.floor(Math.random()*16777215).toString(16);
+      ctx.strokeStyle = currentColor;
       ctx.beginPath();
       ctx.moveTo(x1, y1);
       ctx.lineTo(x2, y2);
@@ -103,14 +109,14 @@ var draw = (function() {
     //Draw a rectangle
     drawRect: function() {
       //Draw some sample rectangles
-      ctx.fillStyle = '#' + Math.floor(Math.random()*16777215).toString(16);
+      ctx.fillStyle = currentColor;
       ctx.fillRect (x1, y1, (x2-x1), (y2-y1));
     },
 
     //"draw" a circle
     drawCircle: function() {
-      ctx.strokeStyle = '#'+Math.floor(Math.random()*16777215).toString(16);
-      ctx.fillStyle = '#'+Math.floor(Math.random()*16777215).toString(16);
+      ctx.strokeStyle = currentColor;
+      ctx.fillStyle = currentColor;
 
       let a = (x1-x2)
       let b = (y1-y2)
@@ -122,9 +128,22 @@ var draw = (function() {
       ctx.fill();
     },
 
+    drawTriangle: function() {
+      ctx.strokeStyle = currentColor;
+      ctx.fillStyle = currentColor;
+      let xTri = Math.random()*500;
+      let yTri = Math.random()*500;
+      ctx.beginPath();
+      ctx.moveTo(x1, y1);
+      ctx.lineTo(x2, y2);
+      ctx.lineTo(xTri, yTri);
+      ctx.lineTo(x1, y1);
+      ctx.stroke();
+      ctx.fill();
+    },
+
     drawPath: function() {
-      //Start by using random fill colors.
-      ctx.strokeStyle = '#'+Math.floor(Math.random()*16777215).toString(16);
+      ctx.strokeStyle = currentColor;
       ctx.beginPath();
       ctx.moveTo(lx, ly);
       ctx.lineTo(x, y);
@@ -141,6 +160,24 @@ var draw = (function() {
 
     getIsDrawing: function() {
       return isDrawing;
+    },
+
+    startup: function() {
+      colorWell = document.getElementById("colorWell");
+      currentColor = colorWell.value;
+      colorWell.addEventListener("input", this.updateFirst);
+      colorWell.addEventListener("change", this.updateAll);
+      colorWell.select();
+    },
+
+    updateFirst: function() {
+      colorWell = document.getElementById("colorWell");
+      currentColor = colorWell.value;
+    },
+
+    updateAll: function() {
+      colorWell = document.getElementById("colorWell");
+      currentColor = colorWell.value;
     },
 
     //Initialize the object, this must be called before anything else
@@ -178,6 +215,10 @@ document.getElementById('btnCirc').addEventListener('click',function(){
   draw.setShape('circle');
 }, false);
 
+document.getElementById('btnTri').addEventListener('click',function(){
+  draw.setShape('triangle');
+}, false);
+
 document.getElementById('btnPath').addEventListener('click',function(){
   draw.setShape('path');
 }, false);
@@ -193,3 +234,5 @@ draw.getCanvas().addEventListener('mouseup', function() {
   draw.draw();
   draw.setIsDrawing(false);
 }, false);
+
+document.addEventListener("load", draw.startup(), false);
