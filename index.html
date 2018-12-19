@@ -2,12 +2,22 @@
 <html lang="en">
   <head>
     <meta charset="UTF-8">
-    <title>HTML Starter</title>
+    <title>HTML5 Draw</title>
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <link rel="stylesheet" href="./dist/css/main.css" type="text/css">
   </head>
   <body>
     <h1>HTML Starter</h1>
+
+    <canvas style="border: 1px solid #000;" id="canvas" height="600px" width="800px"></canvas>
+
+    <script>
+      var canvas = document.getElementById('canvas');
+      var ctx = canvas.getContext('2d');
+      ctx.fillStyle = '#' + Math.floor(Math.random()*16777215).toString(16);
+      ctx.fillRect(10, 10, 100, 100);
+    </script>
+
     <script src="./dist/js/main.js"></script>
   </body>
 </html>
