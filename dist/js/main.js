@@ -37,9 +37,14 @@ var draw = (function() {
   var isDrawing = false;
 
   //Sets color based on user input
-  var colorWell;
+  var colorWell1;
+  var colorWell2;
   var defaultColor = "#0000ff";
-  var currentColor;
+  var fillColor;
+  var strokeColor;
+
+  var isRandomFill = false;
+  var isRandomStroke = false;
 
   return {
     //Set the x,y coords based on current event data
@@ -79,8 +84,26 @@ var draw = (function() {
       isDrawing = bool;
     },
 
+    setRandomFill: function() {
+      if (isRandomFill){
+        isRandomFill = false;
+      }
+      else
+      isRandomFill = true;
+    },
+
+    setRandomStroke: function() {
+      if (isRandomStroke){
+        isRandomStroke = false;
+      }
+      else
+      isRandomStroke = true;
+    },
+
     draw: function() {
       ctx.restore();
+      this.updateFill();
+      this.updateStroke();
       if(shape==='rectangle'){
         this.drawRect();
       } else if(shape==='line') {
@@ -99,7 +122,7 @@ var draw = (function() {
 
     //Draw a line
     drawLine: function() {
-      ctx.strokeStyle = currentColor;
+      ctx.strokeStyle = strokeColor;
       ctx.beginPath();
       ctx.moveTo(x1, y1);
       ctx.lineTo(x2, y2);
@@ -109,14 +132,16 @@ var draw = (function() {
     //Draw a rectangle
     drawRect: function() {
       //Draw some sample rectangles
-      ctx.fillStyle = currentColor;
+      ctx.fillStyle = fillColor;
+      ctx.strokeStyle = strokeColor;
       ctx.fillRect (x1, y1, (x2-x1), (y2-y1));
+      ctx.strokeRect (x1, y1, (x2-x1), (y2-y1));
     },
 
     //"draw" a circle
     drawCircle: function() {
-      ctx.strokeStyle = currentColor;
-      ctx.fillStyle = currentColor;
+      ctx.strokeStyle = strokeColor;
+      ctx.fillStyle = fillColor;
 
       let a = (x1-x2)
       let b = (y1-y2)
@@ -129,10 +154,10 @@ var draw = (function() {
     },
 
     drawTriangle: function() {
-      ctx.strokeStyle = currentColor;
-      ctx.fillStyle = currentColor;
-      let xTri = Math.random()*500;
-      let yTri = Math.random()*500;
+      ctx.strokeStyle = strokeColor;
+      ctx.fillStyle = fillColor;
+      let xTri = Math.random()*canvas.width;
+      let yTri = Math.random()*canvas.height;
       ctx.beginPath();
       ctx.moveTo(x1, y1);
       ctx.lineTo(x2, y2);
@@ -143,11 +168,15 @@ var draw = (function() {
     },
 
     drawPath: function() {
-      ctx.strokeStyle = currentColor;
+      ctx.strokeStyle = strokeColor;
       ctx.beginPath();
       ctx.moveTo(lx, ly);
       ctx.lineTo(x, y);
       ctx.stroke();
+    },
+
+    clear: function() {
+      ctx.clearRect(0, 0, canvas.width, canvas.height);
     },
 
     getCanvas: function(){
@@ -162,22 +191,49 @@ var draw = (function() {
       return isDrawing;
     },
 
+    getFillColor: function() {
+      return fillColor;
+    },
+
+    getStrokeColor: function() {
+      return strokeColor;
+    },
+
     startup: function() {
-      colorWell = document.getElementById("colorWell");
-      currentColor = colorWell.value;
-      colorWell.addEventListener("input", this.updateFirst);
-      colorWell.addEventListener("change", this.updateAll);
-      colorWell.select();
+      colorWell1 = document.getElementById("colorWell1");
+      colorWell2 = document.getElementById("colorWell2");
+      colorWell1.value = defaultColor;
+      colorWell2.value = defaultColor;
+      strokeColor = defaultColor;
+      fillColor = defaultColor;
+      colorWell1.addEventListener("change", this.updateFill);
+      colorWell2.addEventListener("change", this.updateStroke);
     },
 
-    updateFirst: function() {
-      colorWell = document.getElementById("colorWell");
-      currentColor = colorWell.value;
+    updateFill: function() {
+      if (this.isRandomFill()) {
+        fillColor = '#'+Math.floor(Math.random()*16777215).toString(16);
+      }
+      else if (!this.isRandomFill()) {
+        fillColor = colorWell1.value;
+      }
     },
 
-    updateAll: function() {
-      colorWell = document.getElementById("colorWell");
-      currentColor = colorWell.value;
+    updateStroke: function() {
+      if (this.isRandomStroke() === true) {
+        strokeColor = '#'+Math.floor(Math.random()*16777215).toString(16);
+      }
+      else if (this.isRandomStroke() === false) {
+        strokeColor = colorWell2.value;
+      }
+    },
+
+    isRandomFill: function() {
+      return isRandomFill;
+    },
+
+    isRandomStroke: function() {
+      return isRandomStroke;
     },
 
     //Initialize the object, this must be called before anything else
@@ -223,6 +279,11 @@ document.getElementById('btnPath').addEventListener('click',function(){
   draw.setShape('path');
 }, false);
 
+document.getElementById('btnReset').addEventListener('click',function(){
+  draw.clear();
+  draw.setShape('');
+}, false);
+
 //Set the starting position
 draw.getCanvas().addEventListener('mousedown', function() {
   draw.setStart();
@@ -236,3 +297,11 @@ draw.getCanvas().addEventListener('mouseup', function() {
 }, false);
 
 document.addEventListener("load", draw.startup(), false);
+
+document.getElementById('randFillColor').addEventListener('change', function(){
+  draw.setRandomFill();
+});
+
+document.getElementById('randStrokeColor').addEventListener('change', function(){
+  draw.setRandomStroke();
+});
